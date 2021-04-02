@@ -56,8 +56,12 @@ class MLModel(models.Model):
 
     def predict(self, data, steps=None, threshold=0.5):
         model = self.get_loaded_model()
-        preds = model.predict(data, steps=steps)
-        return preds, np.where(preds >= threshold, 1, 0)
+        probs = model.predict(data, steps=steps)
+        preds = np.where(probs >= threshold, 1, 0)
+
+        probs = probs.reshape((probs.shape[0],))
+        preds = preds.reshape((preds.shape[0],))
+        return probs, preds
 
     def get_activation_model(self, conv_idx):
         ml_model = self.get_loaded_model()
@@ -105,3 +109,6 @@ class MLModel(models.Model):
             self._visualize_conv_layers_single_img(
                 activations=img_activs, conv_idx=conv_idx
             )
+
+    def create_prediction_response(self, num_images, conv_idx):
+        pass
