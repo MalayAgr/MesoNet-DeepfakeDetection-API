@@ -1,0 +1,31 @@
+import numpy as np
+from django.conf import settings
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
+IMG_WIDTH = 256
+
+
+def get_data_generator(batch_size):
+    test_datagen = ImageDataGenerator(rescale=1./255)
+    return test_datagen.flow_from_directory(
+        directory=settings.DATA_DIRECTORY,
+        target_size=(IMG_WIDTH, IMG_WIDTH),
+        batch_size=batch_size,
+        class_mode='binary',
+        shuffle=True
+    )
+
+
+def select_batch(batch_size):
+    data = get_data_generator(batch_size)
+    batch_idx = np.random.randint(0, data.samples // data.batch_size)
+
+    imgs, labels = data[batch_idx]
+
+    start = batch_idx * data.batch_size
+
+    end = start + data.batch_size if start >= 0 else None
+    indices = data.index_array[start:end]
+    filepaths = [data.filepaths[i] for i in indices]
+
+    return imgs, filepaths, labels

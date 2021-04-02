@@ -129,3 +129,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = '/media/'
 
 MODEL_FILE_ROOT = os.path.join(BASE_DIR, "ml_models")
+
+DATA_DIRECTORY = os.path.join(BASE_DIR, MEDIA_ROOT, 'pred_data')
