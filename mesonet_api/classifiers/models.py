@@ -2,6 +2,8 @@ import os
 import uuid
 
 from django.db import models
+from tensorflow.keras import Model as KerasModel
+from .storages import MLModelStorage
 
 
 class MLModel(models.Model):
@@ -27,7 +29,9 @@ class MLModel(models.Model):
     model_desc = models.CharField(
         'Model Description', max_length=50, help_text=help_texts['model_desc'])
     model_file = models.FileField(
-        upload_to=get_model_filename, help_text=help_texts['model_file'])
+        upload_to=get_model_filename,
+        storage=MLModelStorage(),
+        help_text=help_texts['model_file'])
 
     class Meta:
         verbose_name = 'ML Model'
@@ -35,3 +39,14 @@ class MLModel(models.Model):
 
     def __str__(self):
         return self.model_name
+
+
+    def get_activation_model(self, conv_idx):
+        model_file = self.model_file
+        conv_layers = [layer for layer in model.layers if 'conv' in layer.name]
+        selected_layers = [layer for index, layer in enumerate(conv_layers) if index in conv_idx]
+        activation_model = KerasModel(
+            inputs=model.inputs,
+            outputs=[layer.output for layer in selected_layers]
+        )
+        return activation_model
