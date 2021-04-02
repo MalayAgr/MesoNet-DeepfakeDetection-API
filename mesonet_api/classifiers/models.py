@@ -2,6 +2,7 @@ import os
 import uuid
 
 import matplotlib.pyplot as plt
+import numpy as np
 from django.conf import settings
 from django.db import models
 from mpl_toolkits.axes_grid1 import ImageGrid
@@ -9,7 +10,6 @@ from tensorflow.keras import Model as KerasModel
 from tensorflow.keras.models import load_model
 
 from .storages import MLModelStorage
-
 
 
 class MLModel(models.Model):
@@ -52,9 +52,14 @@ class MLModel(models.Model):
         )
         return load_model(filepath)
 
+    def predict(model, data, steps=None, threshold=0.5):
+        preds = model.predict(data, steps=steps, verbose=1)
+        return preds, np.where(preds >= threshold, 1, 0)
+
     def get_activation_model(self, conv_idx):
         ml_model = self.get_loaded_model()
-        conv_layers = [layer for layer in ml_model.layers if 'conv' in layer.name]
+        conv_layers = [
+            layer for layer in ml_model.layers if 'conv' in layer.name]
         selected_layers = [
             layer for index, layer in enumerate(conv_layers)
             if index in conv_idx
@@ -92,7 +97,8 @@ class MLModel(models.Model):
         num_layers = len(conv_idx)
 
         for idx in range(num_imgs):
-            img_activs = [activations[i][idx, :, :, :] for i in range(num_layers)]
+            img_activs = [activations[i][idx, :, :, :]
+                          for i in range(num_layers)]
             self._visualize_conv_layers_single_img(
                 activations=img_activs, conv_idx=conv_idx
             )
