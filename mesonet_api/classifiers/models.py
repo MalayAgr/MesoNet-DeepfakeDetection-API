@@ -47,13 +47,16 @@ class MLModel(models.Model):
         return self.model_name
 
     def get_loaded_model(self):
-        filepath = os.path.join(
-            f'{settings.MODEL_FILE_ROOT}', f'{self.model_file.name}'
-        )
-        return load_model(filepath)
+        if not hasattr(self, '_loaded_model'):
+            filepath = os.path.join(
+                f'{settings.MODEL_FILE_ROOT}', f'{self.model_file.name}'
+            )
+            self._loaded_model = load_model(filepath)
+        return self._loaded_model
 
-    def predict(model, data, steps=None, threshold=0.5):
-        preds = model.predict(data, steps=steps, verbose=1)
+    def predict(self, data, steps=None, threshold=0.5):
+        model = self.get_loaded_model()
+        preds = model.predict(data, steps=steps)
         return preds, np.where(preds >= threshold, 1, 0)
 
     def get_activation_model(self, conv_idx):
@@ -70,7 +73,8 @@ class MLModel(models.Model):
         )
         return activation_model
 
-    def _visualize_conv_layers_single_img(self, activations, conv_idx):
+    @staticmethod
+    def _visualize_conv_layers_single_img(activations, conv_idx):
         images_per_row = 4
 
         for activation, idx in zip(activations, conv_idx):
@@ -97,8 +101,7 @@ class MLModel(models.Model):
         num_layers = len(conv_idx)
 
         for idx in range(num_imgs):
-            img_activs = [activations[i][idx, :, :, :]
-                          for i in range(num_layers)]
+            img_activs = [activations[i][idx, :, :, :] for i in range(num_layers)]
             self._visualize_conv_layers_single_img(
                 activations=img_activs, conv_idx=conv_idx
             )
