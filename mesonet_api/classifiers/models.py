@@ -1,9 +1,15 @@
 import os
 import uuid
 
+import matplotlib.pyplot as plt
+from django.conf import settings
 from django.db import models
+from mpl_toolkits.axes_grid1 import ImageGrid
 from tensorflow.keras import Model as KerasModel
+from tensorflow.keras.models import load_model
+
 from .storages import MLModelStorage
+
 
 
 class MLModel(models.Model):
@@ -40,13 +46,53 @@ class MLModel(models.Model):
     def __str__(self):
         return self.model_name
 
+    def get_loaded_model(self):
+        filepath = os.path.join(
+            f'{settings.MODEL_FILE_ROOT}', f'{self.model_file.name}'
+        )
+        return load_model(filepath)
 
     def get_activation_model(self, conv_idx):
-        model_file = self.model_file
-        conv_layers = [layer for layer in model.layers if 'conv' in layer.name]
-        selected_layers = [layer for index, layer in enumerate(conv_layers) if index in conv_idx]
+        ml_model = self.get_loaded_model()
+        conv_layers = [layer for layer in ml_model.layers if 'conv' in layer.name]
+        selected_layers = [
+            layer for index, layer in enumerate(conv_layers)
+            if index in conv_idx
+        ]
         activation_model = KerasModel(
-            inputs=model.inputs,
+            inputs=ml_model.inputs,
             outputs=[layer.output for layer in selected_layers]
         )
         return activation_model
+
+    def _visualize_conv_layers_single_img(self, activations, conv_idx):
+        images_per_row = 4
+
+        for activation, idx in zip(activations, conv_idx):
+            num_filters = activation.shape[-1]
+
+            imgs = [activation[:, :, i] for i in range(num_filters)]
+
+            num_rows = num_filters // images_per_row
+
+            fig = plt.figure()
+            grid = ImageGrid(fig, 111, (num_rows, images_per_row))
+
+            for ax, im in zip(grid, imgs):
+                ax.imshow(im, cmap='viridis')
+
+            plt.title(f'Convolutional Layer {idx + 1}')
+            plt.show()
+
+    def visualize_conv_layers(self, imgs, conv_idx):
+        activation_model = self.get_activation_model(conv_idx)
+        activations = activation_model.predict(imgs)
+
+        num_imgs = imgs.shape[0]
+        num_layers = len(conv_idx)
+
+        for idx in range(num_imgs):
+            img_activs = [activations[i][idx, :, :, :] for i in range(num_layers)]
+            self._visualize_conv_layers_single_img(
+                activations=img_activs, conv_idx=conv_idx
+            )
