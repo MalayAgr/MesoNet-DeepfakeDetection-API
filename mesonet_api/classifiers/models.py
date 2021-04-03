@@ -1,9 +1,12 @@
 import os
 import uuid
+from io import BytesIO
 
 import matplotlib.pyplot as plt
 import numpy as np
 from django.conf import settings
+from django.core.files.storage import default_storage
+from django.core.files.images import ImageFile
 from django.db import models
 from mpl_toolkits.axes_grid1 import ImageGrid
 from tensorflow.keras import Model as KerasModel
@@ -21,6 +24,7 @@ class MLModel(models.Model):
         )
 
     root = 'trained_models'
+    plot_root = os.path.join(f'{settings.MEDIA_ROOT}', 'plots')
 
     help_texts = {
         'model_name': 'A user-friendly name for the model',
@@ -77,10 +81,18 @@ class MLModel(models.Model):
         )
         return activation_model
 
-    @staticmethod
-    def _visualize_conv_layers_single_img(activations, conv_idx):
+    @classmethod
+    def save_plot(cls, f, filename_seed, idx):
+        filepath = f'{filename_seed}_conv{idx}.png'
+        filepath = os.path.join(cls.plot_root, filepath)
+        filepath = default_storage.save(filepath, ImageFile(f))
+        return default_storage.url(filepath)
+
+    @classmethod
+    def _visualize_conv_layers_single_img(cls, activations, conv_idx, filename_seed):
         images_per_row = 4
 
+        urls = []
         for activation, idx in zip(activations, conv_idx):
             num_filters = activation.shape[-1]
 
@@ -95,7 +107,15 @@ class MLModel(models.Model):
                 ax.imshow(im, cmap='viridis')
 
             plt.title(f'Convolutional Layer {idx + 1}')
-            plt.show()
+
+            f = BytesIO()
+            plt.savefig(f, format='png')
+
+            plot_url = cls.save_plot(f, filename_seed, idx)
+            urls.append(plot_url)
+
+            plt.clf()
+        return urls
 
     def visualize_conv_layers(self, imgs, conv_idx):
         activation_model = self.get_activation_model(conv_idx)
@@ -104,11 +124,15 @@ class MLModel(models.Model):
         num_imgs = imgs.shape[0]
         num_layers = len(conv_idx)
 
+        urls = []
         for idx in range(num_imgs):
             img_activs = [activations[i][idx, :, :, :] for i in range(num_layers)]
-            self._visualize_conv_layers_single_img(
-                activations=img_activs, conv_idx=conv_idx
-            )
+            urls.append(self._visualize_conv_layers_single_img(
+                activations=img_activs,
+                conv_idx=conv_idx,
+                filename_seed=f'plot_img{idx}'
+            ))
+        return urls
 
     def create_prediction_response(self, num_images, conv_idx):
         pass
