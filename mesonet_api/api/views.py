@@ -4,8 +4,6 @@ from django.shortcuts import get_object_or_404, render
 from rest_framework import generics, permissions, views
 from rest_framework.response import Response
 
-import json
-
 
 class ListModelsView(generics.ListAPIView):
     queryset = MLModel.objects.all()

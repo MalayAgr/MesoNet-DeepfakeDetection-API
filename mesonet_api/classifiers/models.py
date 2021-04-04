@@ -1,5 +1,4 @@
 import os
-from os.path import supports_unicode_filenames
 import uuid
 from io import BytesIO
 
@@ -128,7 +127,8 @@ class MLModel(models.Model):
 
         urls = []
         for idx in range(num_imgs):
-            img_activs = [activations[i][idx, :, :, :] for i in range(num_layers)]
+            img_activs = [activations[i][idx, :, :, :]
+                          for i in range(num_layers)]
             urls.append(self._visualize_conv_layers_single_img(
                 activations=img_activs,
                 conv_idx=conv_idx,
@@ -158,4 +158,3 @@ class MLModel(models.Model):
             }
 
         return details
-

@@ -1,7 +1,8 @@
+import os
+
 import numpy as np
 from django.conf import settings
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-import os
 
 IMG_WIDTH = 256
 
@@ -27,7 +28,10 @@ def select_img_batch(batch_size):
 
     end = start + data.batch_size if start >= 0 else None
     indices = data.index_array[start:end]
-    filenames = [os.path.join(settings.DATA_ROOT, data.filenames[i]) for i in indices]
+    filenames = [
+        os.path.join(settings.DATA_ROOT, data.filenames[i])
+        for i in indices
+    ]
 
     class_mapping = {value: key for key, value in data.class_indices.items()}
 
