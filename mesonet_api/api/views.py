@@ -1,8 +1,17 @@
 from classifiers.models import MLModel
 from classifiers.serializers import MLModelSerializer
+from classifiers.utils import get_dataset_size
 from django.shortcuts import get_object_or_404, render
 from rest_framework import generics, permissions, views
 from rest_framework.response import Response
+
+
+class DatasetSizeView(views.APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        response = {'size': get_dataset_size()}
+        return Response(response)
 
 
 class ListModelsView(generics.ListAPIView):

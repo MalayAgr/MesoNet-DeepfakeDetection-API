@@ -7,7 +7,7 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 IMG_WIDTH = 256
 
 
-def get_data_generator(batch_size):
+def get_data_generator(batch_size=64):
     test_datagen = ImageDataGenerator(rescale=1./255)
     return test_datagen.flow_from_directory(
         directory=settings.DATA_DIRECTORY,
@@ -36,3 +36,7 @@ def select_img_batch(batch_size):
     class_mapping = {value: key for key, value in data.class_indices.items()}
 
     return imgs, filenames, labels, class_mapping
+
+
+def get_dataset_size():
+    return get_data_generator().samples
