@@ -4,6 +4,8 @@ from django.shortcuts import get_object_or_404, render
 from rest_framework import generics, permissions, views
 from rest_framework.response import Response
 
+import json
+
 
 class ListModelsView(generics.ListAPIView):
     queryset = MLModel.objects.all()
@@ -18,10 +20,8 @@ class PredictionResultsView(views.APIView):
         selected_model = get_object_or_404(MLModel, pk=kwargs['model_pk'])
 
         num_imgs = kwargs['num_imgs']
-        conv_idx = kwargs['conv_idx']
+        conv_idx = [int(idx) for idx in kwargs['conv_idx']]
 
-        response = selected_model.create_prediction_response(
-            num_imgs, conv_idx
-        )
+        response = selected_model.get_prediction_details(num_imgs, conv_idx)
 
-        return Response()
+        return Response(response)
