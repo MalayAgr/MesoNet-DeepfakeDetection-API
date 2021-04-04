@@ -125,9 +125,13 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static")
 ]
 
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+MEDIA_FOLDER = 'media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, MEDIA_FOLDER)
 MEDIA_URL = '/media/'
+
 
 MODEL_FILE_ROOT = os.path.join(BASE_DIR, "ml_models")
 
-DATA_DIRECTORY = os.path.join(BASE_DIR, MEDIA_ROOT, 'pred_data')
+DATA_ROOT = 'data/'
+DATA_DIRECTORY = os.path.join(BASE_DIR, MEDIA_ROOT, DATA_ROOT)
