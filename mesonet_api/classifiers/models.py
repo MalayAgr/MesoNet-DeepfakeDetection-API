@@ -1,18 +1,20 @@
 import os
+from os.path import supports_unicode_filenames
 import uuid
 from io import BytesIO
 
 import matplotlib.pyplot as plt
 import numpy as np
 from django.conf import settings
-from django.core.files.storage import default_storage
 from django.core.files.images import ImageFile
+from django.core.files.storage import default_storage
 from django.db import models
 from mpl_toolkits.axes_grid1 import ImageGrid
 from tensorflow.keras import Model as KerasModel
 from tensorflow.keras.models import load_model
 
 from .storages import MLModelStorage
+from .utils import select_img_batch
 
 
 class MLModel(models.Model):
@@ -24,7 +26,7 @@ class MLModel(models.Model):
         )
 
     root = 'trained_models'
-    plot_root = os.path.join(f'{settings.MEDIA_ROOT}', 'plots')
+    plot_root = 'plots'
 
     help_texts = {
         'model_name': 'A user-friendly name for the model',
@@ -130,9 +132,30 @@ class MLModel(models.Model):
             urls.append(self._visualize_conv_layers_single_img(
                 activations=img_activs,
                 conv_idx=conv_idx,
-                filename_seed=f'plot_img{idx}'
+                filename_seed=f'plot_img{idx + 1}'
             ))
         return urls
 
-    def create_prediction_response(self, num_images, conv_idx):
-        pass
+    def get_prediction_details(self, num_imgs, conv_idx):
+        imgs, filenames, labels, label_map = select_img_batch(num_imgs)
+
+        probs, preds = self.predict(imgs)
+        plot_urls = self.visualize_conv_layers(imgs, conv_idx)
+
+        indices = range(num_imgs)
+        iterator = zip(
+            filenames, plot_urls, labels, probs, preds, indices
+        )
+
+        details = {}
+        for filename, plots, label, prob, pred, idx in iterator:
+            details[f'img{idx + 1}'] = {
+                'img_url': default_storage.url(filename),
+                'true_label': label_map[int(label)],
+                'pred_label': label_map[pred],
+                'probability': (1 - prob if pred == 0 else prob) * 100,
+                'plots': plots,
+            }
+
+        return details
+
