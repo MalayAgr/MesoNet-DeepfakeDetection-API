@@ -3,17 +3,15 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from .models import MLModel
-from .utils import get_data_generator
+
 
 
 @receiver(post_save, sender=MLModel)
-def create_profile(sender, instance, created, **kwrags):
+def create_profile(sender, instance, created, **kwargs):
     if created:
-        model = instance.get_loaded_model()
-        data = get_data_generator(shuffle=False)
+        instance.accuracy = instance.evaluate_model()
+        instance.clr = instance.get_clr()
 
-        evaluation = model.evaluate(data, verbose=0)
-        evaluation = dict(zip(model.metrics_names, evaluation))
+        print(instance.clr)
 
-        instance.accuracy = round(evaluation['accuracy'] * 100, 2)
-        instance.save(update_fields=['accuracy'])
+        instance.save(update_fields=['accuracy', 'clr'])

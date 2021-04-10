@@ -11,9 +11,11 @@ from django.db import models
 from mpl_toolkits.axes_grid1 import ImageGrid
 from tensorflow.keras import Model as KerasModel
 from tensorflow.keras.models import load_model
+from sklearn.metrics import classification_report
 
 from .storages import MLModelStorage
-from .utils import select_img_batch, get_data_generator
+from .utils import select_img_batch
+from .utils import get_data_generator
 
 
 class MLModel(models.Model):
@@ -41,6 +43,7 @@ class MLModel(models.Model):
         'model_file': 'The HDF5 containing the model',
         'loss_curve': 'The loss curve of the model',
         'accuracy': 'The accuracy of the model (calculated when saved)',
+        'clr': 'The classification report of the model (generated when saved)'
     }
 
     model_id = models.UUIDField(
@@ -68,6 +71,14 @@ class MLModel(models.Model):
         help_text=help_texts['accuracy']
     )
 
+    clr = models.TextField(
+        'Classification Report',
+        editable=False,
+        default='',
+        help_text=help_texts['clr'],
+        max_length=500
+    )
+
     class Meta:
         verbose_name = 'ML Model'
         verbose_name_plural = 'ML Models'
@@ -82,6 +93,21 @@ class MLModel(models.Model):
             )
             self._loaded_model = load_model(filepath)
         return self._loaded_model
+
+    def evaluate_model(self):
+        model = self.get_loaded_model()
+        data = get_data_generator(shuffle=False)
+
+        evaluation = model.evaluate(data, verbose=0)
+        evaluation = dict(zip(model.metrics_names, evaluation))
+
+        return round(evaluation['accuracy'] * 100, 2)
+
+    def get_clr(self):
+        data = get_data_generator(shuffle=False)
+        _, preds = self.predict(data)
+
+        return classification_report(data.classes, preds)
 
     def predict(self, data, steps=None, threshold=0.5):
         model = self.get_loaded_model()

@@ -8,5 +8,6 @@ class MLModelSerializer(serializers.HyperlinkedModelSerializer):
         model = MLModel
         fields = [
             'model_id', 'model_name',
-            'model_desc', 'loss_curve', 'accuracy'
+            'model_desc', 'loss_curve',
+            'accuracy', 'clr'
         ]

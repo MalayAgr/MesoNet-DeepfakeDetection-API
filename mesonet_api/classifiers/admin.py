@@ -4,4 +4,4 @@ from .models import MLModel
 # Register your models here.
 @admin.register(MLModel)
 class MLModelAdmin(admin.ModelAdmin):
-    readonly_fields = ['accuracy']
+    readonly_fields = ['accuracy', 'clr']
