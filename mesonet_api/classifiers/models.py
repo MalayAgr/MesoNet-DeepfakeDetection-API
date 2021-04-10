@@ -64,8 +64,8 @@ class MLModel(models.Model):
         probs = model.predict(data, steps=steps)
         preds = np.where(probs >= threshold, 1, 0)
 
-        probs = probs.reshape((probs.shape[0],))
-        preds = preds.reshape((preds.shape[0],))
+        probs = probs.reshape(-1)
+        preds = preds.reshape(-1)
         return probs, preds
 
     def get_activation_model(self, conv_idx):
@@ -140,21 +140,23 @@ class MLModel(models.Model):
         imgs, filenames, labels, label_map = select_img_batch(num_imgs)
 
         probs, preds = self.predict(imgs)
-        plot_urls = self.visualize_conv_layers(imgs, conv_idx)
 
         indices = range(num_imgs)
-        iterator = zip(
-            filenames, plot_urls, labels, probs, preds, indices
-        )
+        iterator = zip(filenames, labels, probs, preds, indices)
 
         details = {}
-        for filename, plots, label, prob, pred, idx in iterator:
+        for filename, label, prob, pred, idx in iterator:
             details[f'img{idx + 1}'] = {
                 'img_url': default_storage.url(filename),
                 'true_label': label_map[int(label)],
                 'pred_label': label_map[pred],
-                'probability': (1 - prob if pred == 0 else prob) * 100,
-                'plots': plots,
+                'probability': (1 - prob if pred == 0 else prob) * 100
             }
+
+        if conv_idx:
+            plot_urls = self.visualize_conv_layers(imgs, conv_idx)
+
+            for idx, plots in enumerate(plot_urls):
+                details[f'img{idx + 1}']['plots'] = plots
 
         return details

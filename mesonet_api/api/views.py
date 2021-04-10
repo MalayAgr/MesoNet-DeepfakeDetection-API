@@ -27,7 +27,10 @@ class PredictionResultsView(views.APIView):
         selected_model = get_object_or_404(MLModel, pk=kwargs['model_pk'])
 
         num_imgs = kwargs['num_imgs']
-        conv_idx = [int(idx) for idx in kwargs['conv_idx']]
+
+        conv_idx = kwargs.get('conv_idx', [])
+        if conv_idx:
+            conv_idx = [int(idx) for idx in conv_idx]
 
         response = selected_model.get_prediction_details(num_imgs, conv_idx)
 
