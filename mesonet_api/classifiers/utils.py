@@ -7,14 +7,14 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 IMG_WIDTH = 256
 
 
-def get_data_generator(batch_size=64):
+def get_data_generator(batch_size=64, shuffle=True):
     test_datagen = ImageDataGenerator(rescale=1./255)
     return test_datagen.flow_from_directory(
         directory=settings.DATA_DIRECTORY,
         target_size=(IMG_WIDTH, IMG_WIDTH),
         batch_size=batch_size,
         class_mode='binary',
-        shuffle=True
+        shuffle=shuffle
     )
 
 

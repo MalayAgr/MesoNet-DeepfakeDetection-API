@@ -13,7 +13,7 @@ from tensorflow.keras import Model as KerasModel
 from tensorflow.keras.models import load_model
 
 from .storages import MLModelStorage
-from .utils import select_img_batch
+from .utils import select_img_batch, get_data_generator
 
 
 class MLModel(models.Model):
@@ -24,25 +24,49 @@ class MLModel(models.Model):
             f'{self.root}', f'{filename}{ext}'
         )
 
+    def get_loss_curve_filename(self, filename):
+        _, ext = os.path.splitext(filename)
+        filename = '_'.join(self.model_name.lower().split())
+        return os.path.join(
+            f'{self.loss_root}', f'{filename}_curve{ext}'
+        )
+
     root = 'trained_models'
+    loss_root = 'loss_curves'
     plot_root = 'plots'
 
     help_texts = {
         'model_name': 'A user-friendly name for the model',
         'model_desc': 'A short description of the model that can help the user make a decision',
-        'model_file': 'The HDF5 containing the model'
+        'model_file': 'The HDF5 containing the model',
+        'loss_curve': 'The loss curve of the model',
+        'accuracy': 'The accuracy of the model',
     }
 
     model_id = models.UUIDField(
         'Model ID', default=uuid.uuid4, editable=False, primary_key=True)
+
     model_name = models.CharField(
         'Model Name', max_length=30, help_text=help_texts['model_name'], unique=True)
+
     model_desc = models.CharField(
         'Model Description', max_length=50, help_text=help_texts['model_desc'])
+
     model_file = models.FileField(
         upload_to=get_model_filename,
         storage=MLModelStorage(),
         help_text=help_texts['model_file'])
+
+    loss_curve = models.ImageField(
+        upload_to=get_loss_curve_filename,
+        help_text=help_texts['loss_curve']
+    )
+
+    accuracy = models.FloatField(
+        editable=False,
+        default=0.0,
+        help_text=help_texts['accuracy']
+    )
 
     class Meta:
         verbose_name = 'ML Model'
@@ -83,7 +107,7 @@ class MLModel(models.Model):
         return activation_model
 
     @classmethod
-    def save_plot(cls, f, filename_seed, idx):
+    def save_plot(cls, f, filename_seed, idx=0):
         filepath = f'{filename_seed}_conv{idx}.png'
         filepath = os.path.join(cls.plot_root, filepath)
         filepath = default_storage.save(filepath, ImageFile(f))
@@ -129,12 +153,11 @@ class MLModel(models.Model):
         for idx in range(num_imgs):
             img_activs = [activations[i][idx, :, :, :]
                           for i in range(num_layers)]
-            urls.append(self._visualize_conv_layers_single_img(
+            yield self._visualize_conv_layers_single_img(
                 activations=img_activs,
                 conv_idx=conv_idx,
                 filename_seed=f'plot_img{idx + 1}'
-            ))
-        return urls
+            )
 
     def get_prediction_details(self, num_imgs, conv_idx):
         imgs, filenames, labels, label_map = select_img_batch(num_imgs)
