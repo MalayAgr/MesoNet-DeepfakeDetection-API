@@ -9,13 +9,12 @@ from django.core.files.images import ImageFile
 from django.core.files.storage import default_storage
 from django.db import models
 from mpl_toolkits.axes_grid1 import ImageGrid
+from sklearn.metrics import classification_report
 from tensorflow.keras import Model as KerasModel
 from tensorflow.keras.models import load_model
-from sklearn.metrics import classification_report
 
 from .storages import MLModelStorage
-from .utils import select_img_batch
-from .utils import get_data_generator
+from .utils import get_data_generator, select_img_batch
 
 
 class MLModel(models.Model):
