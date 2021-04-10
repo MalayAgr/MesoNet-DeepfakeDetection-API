@@ -40,7 +40,7 @@ class MLModel(models.Model):
         'model_desc': 'A short description of the model that can help the user make a decision',
         'model_file': 'The HDF5 containing the model',
         'loss_curve': 'The loss curve of the model',
-        'accuracy': 'The accuracy of the model',
+        'accuracy': 'The accuracy of the model (calculated when saved)',
     }
 
     model_id = models.UUIDField(
