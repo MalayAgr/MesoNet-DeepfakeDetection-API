@@ -159,7 +159,6 @@ class MLModel(models.Model):
         num_imgs = imgs.shape[0]
         num_layers = len(conv_idx)
 
-        urls = []
         for idx in range(num_imgs):
             img_activs = [activations[i][idx, :, :, :] for i in range(num_layers)]
             yield self._visualize_conv_layers_single_img(
