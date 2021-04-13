@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -21,8 +23,15 @@ def evaluate_model(model):
     )
 
 
+def get_conv_layer_details(model):
+    loaded_model = model.get_loaded_model()
+    conv_layers = [layer for layer in loaded_model.layers if "conv" in layer.name]
+    return [[layer.filters, layer.kernel_size] for layer in conv_layers]
+
+
 @receiver(post_save, sender=MLModel)
 def populate_accuracy_and_clr(sender, instance, created, **kwargs):
     if created:
         instance.accuracy, instance.clr = evaluate_model(instance)
-        instance.save(update_fields=["accuracy", "clr"])
+        instance.conv_layers = json.dumps(get_conv_layer_details(instance))
+        instance.save(update_fields=["accuracy", "clr", "conv_layers"])
