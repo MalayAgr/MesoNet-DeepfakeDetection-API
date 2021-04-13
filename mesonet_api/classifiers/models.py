@@ -109,9 +109,7 @@ class MLModel(models.Model):
     def get_activation_model(self, conv_idx):
         ml_model = self.get_loaded_model()
         conv_layers = [layer for layer in ml_model.layers if "conv" in layer.name]
-        selected_layers = [
-            layer for index, layer in enumerate(conv_layers) if index in conv_idx
-        ]
+        selected_layers = [conv_layers[idx] for idx in conv_idx]
         activation_model = KerasModel(
             inputs=ml_model.inputs, outputs=[layer.output for layer in selected_layers]
         )
@@ -181,7 +179,7 @@ class MLModel(models.Model):
                 "img_url": default_storage.url(filename),
                 "true_label": label_map[int(label)],
                 "pred_label": label_map[pred],
-                "probability": (1 - prob if pred == 0 else prob) * 100,
+                "probability": round((1 - prob if pred == 0 else prob) * 100, 4),
             }
 
         if conv_idx:
