@@ -13,4 +13,5 @@ class MLModelSerializer(serializers.HyperlinkedModelSerializer):
             "loss_curve",
             "accuracy",
             "clr",
+            "conv_layers",
         ]
