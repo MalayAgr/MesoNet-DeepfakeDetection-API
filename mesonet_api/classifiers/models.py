@@ -78,7 +78,7 @@ class MLModel(models.Model):
     conv_layers = models.JSONField(
         "Convolutional Layers",
         editable=False,
-        default={},
+        default=str,
         help_text=help_texts["conv_layers"],
     )
 
