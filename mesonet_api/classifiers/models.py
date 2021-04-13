@@ -9,12 +9,11 @@ from django.core.files.images import ImageFile
 from django.core.files.storage import default_storage
 from django.db import models
 from mpl_toolkits.axes_grid1 import ImageGrid
-from sklearn.metrics import classification_report
 from tensorflow.keras import Model as KerasModel
 from tensorflow.keras.models import load_model
 
 from .storages import MLModelStorage
-from .utils import get_data_generator, select_img_batch
+from .utils import select_img_batch
 
 
 class MLModel(models.Model):
@@ -39,6 +38,7 @@ class MLModel(models.Model):
         "loss_curve": "The loss curve of the model",
         "accuracy": "The accuracy of the model (calculated when saved)",
         "clr": "The classification report of the model (generated when saved)",
+        "conv_layers": "The # and size of filters of each convolutional layer (detected when saved)",
     }
 
     model_id = models.UUIDField(
@@ -73,6 +73,13 @@ class MLModel(models.Model):
         default="",
         help_text=help_texts["clr"],
         max_length=500,
+    )
+
+    conv_layers = models.JSONField(
+        "Convolutional Layers",
+        editable=False,
+        default={},
+        help_text=help_texts["conv_layers"],
     )
 
     class Meta:
