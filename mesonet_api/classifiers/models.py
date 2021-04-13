@@ -130,12 +130,11 @@ class MLModel(models.Model):
             num_rows = num_filters // images_per_row
 
             fig = plt.figure()
+            fig.suptitle(f"Convolutional Layer {idx + 1}")
             grid = ImageGrid(fig, 111, (num_rows, images_per_row))
 
             for ax, im in zip(grid, imgs):
                 ax.imshow(im, cmap="viridis")
-
-            plt.title(f"Convolutional Layer {idx + 1}")
 
             f = BytesIO()
             plt.savefig(f, format="png")
