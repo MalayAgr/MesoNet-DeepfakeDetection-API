@@ -90,21 +90,6 @@ class MLModel(models.Model):
             self._loaded_model = load_model(filepath)
         return self._loaded_model
 
-    def evaluate_model(self):
-        model = self.get_loaded_model()
-        data = get_data_generator(shuffle=False)
-
-        evaluation = model.evaluate(data, verbose=0)
-        evaluation = dict(zip(model.metrics_names, evaluation))
-
-        return round(evaluation["accuracy"] * 100, 2)
-
-    def get_clr(self):
-        data = get_data_generator(shuffle=False)
-        _, preds = self.predict(data)
-
-        return classification_report(data.classes, preds)
-
     def predict(self, data, steps=None, threshold=0.5):
         model = self.get_loaded_model()
         probs = model.predict(data, steps=steps)
