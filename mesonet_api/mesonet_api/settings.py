@@ -21,7 +21,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "puw@bv1)j^0a@(%_lgyhzf=a37wd=((mcykbuw*c7pcbe@+cv@"
+# SECRET_KEY = "puw@bv1)j^0a@(%_lgyhzf=a37wd=((mcykbuw*c7pcbe@+cv@"
+SECRET_KEY = os.environ.get("SECRET_KEY")
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -120,16 +122,17 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
+STATIC_FOLDER = os.environ.get("STATICFILES_DIR", "static")
+STATICFILES_DIRS = [os.path.join(BASE_DIR, STATIC_FOLDER)]
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
 
-MEDIA_FOLDER = "media/"
+MEDIA_FOLDER = os.environ.get("MEDIA_FOLDER", "media")
 MEDIA_ROOT = os.path.join(BASE_DIR, MEDIA_FOLDER)
 MEDIA_URL = "/media/"
 
+MODEL_FOLDER = os.environ.get("MODEL_FILE_ROOT", "ml_models")
+MODEL_FILE_ROOT = os.path.join(BASE_DIR, MODEL_FOLDER)
 
-MODEL_FILE_ROOT = os.path.join(BASE_DIR, "ml_models")
-
-DATA_ROOT = "data/"
+DATA_ROOT = os.environ.get("DATA_ROOT", "data")
 DATA_DIRECTORY = os.path.join(BASE_DIR, MEDIA_ROOT, DATA_ROOT)
