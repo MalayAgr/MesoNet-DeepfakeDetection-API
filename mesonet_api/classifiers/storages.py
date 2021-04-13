@@ -6,5 +6,5 @@ from django.utils.deconstruct import deconstructible
 @deconstructible
 class MLModelStorage(FileSystemStorage):
     def __init__(self, **kwargs):
-        kwargs.update({'location': settings.MODEL_FILE_ROOT})
+        kwargs.update({"location": settings.MODEL_FILE_ROOT})
         super().__init__(**kwargs)

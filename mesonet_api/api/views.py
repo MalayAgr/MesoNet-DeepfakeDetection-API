@@ -10,7 +10,7 @@ class DatasetSizeView(views.APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, *args, **kwargs):
-        response = {'size': get_dataset_size()}
+        response = {"size": get_dataset_size()}
         return Response(response)
 
 
@@ -24,11 +24,11 @@ class PredictionResultsView(views.APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, *args, **kwargs):
-        selected_model = get_object_or_404(MLModel, pk=kwargs['model_pk'])
+        selected_model = get_object_or_404(MLModel, pk=kwargs["model_pk"])
 
-        num_imgs = kwargs['num_imgs']
+        num_imgs = kwargs["num_imgs"]
 
-        conv_idx = kwargs.get('conv_idx', [])
+        conv_idx = kwargs.get("conv_idx", [])
         if conv_idx:
             conv_idx = [int(idx) for idx in conv_idx]
 

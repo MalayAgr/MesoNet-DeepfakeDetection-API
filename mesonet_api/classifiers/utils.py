@@ -8,13 +8,13 @@ IMG_WIDTH = 256
 
 
 def get_data_generator(batch_size=64, shuffle=True):
-    test_datagen = ImageDataGenerator(rescale=1./255)
+    test_datagen = ImageDataGenerator(rescale=1.0 / 255)
     return test_datagen.flow_from_directory(
         directory=settings.DATA_DIRECTORY,
         target_size=(IMG_WIDTH, IMG_WIDTH),
         batch_size=batch_size,
-        class_mode='binary',
-        shuffle=shuffle
+        class_mode="binary",
+        shuffle=shuffle,
     )
 
 
@@ -28,10 +28,7 @@ def select_img_batch(batch_size):
 
     end = start + data.batch_size if start >= 0 else None
     indices = data.index_array[start:end]
-    filenames = [
-        os.path.join(settings.DATA_ROOT, data.filenames[i])
-        for i in indices
-    ]
+    filenames = [os.path.join(settings.DATA_ROOT, data.filenames[i]) for i in indices]
 
     class_mapping = {value: key for key, value in data.class_indices.items()}
 

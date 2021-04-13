@@ -11,4 +11,4 @@ def create_profile(sender, instance, created, **kwargs):
         instance.accuracy = instance.evaluate_model()
         instance.clr = instance.get_clr()
 
-        instance.save(update_fields=['accuracy', 'clr'])
+        instance.save(update_fields=["accuracy", "clr"])
