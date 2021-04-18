@@ -37,3 +37,21 @@ def select_img_batch(batch_size):
 
 def get_dataset_size():
     return get_data_generator().samples
+
+
+def clr_to_tabular(clr):
+    columns = ["", "precision", "recall", "f1-score", "support"]
+
+    rows = []
+    for key, value in clr.items():
+        if key == "accuracy":
+            support = clr["weighted avg"]["support"]
+            accuracy = round(clr["accuracy"], 2)
+            rows.append(["accuracy", "", "", accuracy, support])
+            continue
+        row = []
+        row.append(key)
+        row.extend((round(x, 2) for x in value.values()))
+        rows.append(row)
+
+    return {"columns": columns, "rows": rows}

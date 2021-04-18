@@ -50,7 +50,7 @@ class MLModel(models.Model):
     )
 
     model_desc = models.CharField(
-        "Model Description", max_length=50, help_text=help_texts["model_desc"]
+        "Model Description", max_length=200, help_text=help_texts["model_desc"]
     )
 
     model_file = models.FileField(
@@ -67,12 +67,11 @@ class MLModel(models.Model):
         editable=False, default=0.0, help_text=help_texts["accuracy"]
     )
 
-    clr = models.TextField(
+    clr = models.JSONField(
         "Classification Report",
         editable=False,
-        default="",
+        default=str,
         help_text=help_texts["clr"],
-        max_length=500,
     )
 
     conv_layers = models.JSONField(

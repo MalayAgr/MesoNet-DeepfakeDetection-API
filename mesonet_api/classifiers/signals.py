@@ -6,7 +6,7 @@ from django.dispatch import receiver
 from sklearn.metrics import classification_report
 
 from .models import MLModel
-from .utils import get_data_generator
+from .utils import get_data_generator, clr_to_tabular
 
 
 def evaluate_model(model):
@@ -18,9 +18,9 @@ def evaluate_model(model):
 
     _, preds = model.predict(data)
 
-    return round(metrics["accuracy"] * 100, 2), classification_report(
-        data.classes, preds
-    )
+    clr = classification_report(data.classes, preds, output_dict=True)
+
+    return round(metrics["accuracy"] * 100, 2), clr_to_tabular(clr)
 
 
 def get_conv_layer_details(model):
@@ -33,5 +33,5 @@ def get_conv_layer_details(model):
 def populate_accuracy_and_clr(sender, instance, created, **kwargs):
     if created:
         instance.accuracy, instance.clr = evaluate_model(instance)
-        instance.conv_layers = json.dumps(get_conv_layer_details(instance))
+        instance.conv_layers = get_conv_layer_details(instance)
         instance.save(update_fields=["accuracy", "clr", "conv_layers"])
