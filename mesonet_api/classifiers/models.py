@@ -13,7 +13,6 @@ from tensorflow.keras import Model as KerasModel
 from tensorflow.keras.models import load_model
 
 from .storages import MLModelStorage
-from .utils import select_img_batch
 
 
 class MLModel(models.Model):
@@ -150,11 +149,13 @@ class MLModel(models.Model):
         return urls
 
     def visualize_conv_layers(self, imgs, conv_idx):
+        num_layers = len(conv_idx)
+
         activation_model = self.get_activation_model(conv_idx)
         activations = activation_model.predict(imgs)
+        activations = [activations] if num_layers == 1 else activations
 
         num_imgs = imgs.shape[0]
-        num_layers = len(conv_idx)
 
         for idx in range(num_imgs):
             img_activs = [activations[i][idx, :, :, :] for i in range(num_layers)]
@@ -163,28 +164,3 @@ class MLModel(models.Model):
                 conv_idx=conv_idx,
                 filename_seed=f"plot_img{idx + 1}",
             )
-
-    def get_prediction_details(self, num_imgs, conv_idx):
-        imgs, filenames, labels, label_map = select_img_batch(num_imgs)
-
-        probs, preds = self.predict(imgs)
-
-        indices = range(num_imgs)
-        iterator = zip(filenames, labels, probs, preds, indices)
-
-        details = {}
-        for filename, label, prob, pred, idx in iterator:
-            details[f"img{idx + 1}"] = {
-                "img_url": default_storage.url(filename),
-                "true_label": label_map[int(label)],
-                "pred_label": label_map[pred],
-                "probability": round((1 - prob if pred == 0 else prob) * 100, 4),
-            }
-
-        if conv_idx:
-            plot_urls = self.visualize_conv_layers(imgs, conv_idx)
-
-            for idx, plots in enumerate(plot_urls):
-                details[f"img{idx + 1}"]["plots"] = plots
-
-        return details
