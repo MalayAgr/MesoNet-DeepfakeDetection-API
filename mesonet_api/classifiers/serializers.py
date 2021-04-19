@@ -15,3 +15,11 @@ class MLModelSerializer(serializers.HyperlinkedModelSerializer):
             "clr",
             "conv_layers",
         ]
+
+
+class PredictionSerializer(serializers.Serializer):
+    img_url = serializers.URLField()
+    true_label = serializers.CharField(max_length=20)
+    pred_label = serializers.CharField(max_length=20)
+    probability = serializers.FloatField()
+    plots = serializers.ListField(child=serializers.URLField())
