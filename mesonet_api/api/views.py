@@ -1,7 +1,7 @@
 from classifiers.models import MLModel
-from classifiers.serializers import MLModelSerializer
-from classifiers.utils import get_dataset_size
-from django.shortcuts import get_object_or_404, render
+from classifiers.serializers import MLModelSerializer, PredictionSerializer
+from classifiers.utils import get_dataset_size, get_predictions
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, views
 from rest_framework.response import Response
 
@@ -20,18 +20,18 @@ class ListModelsView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
 
 
-class PredictionResultsView(views.APIView):
+class PredictionResultsView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
+    serializer_class = PredictionSerializer
 
-    def get(self, request, *args, **kwargs):
-        selected_model = get_object_or_404(MLModel, pk=kwargs["model_pk"])
+    def get_queryset(self):
+        model_pk = self.kwargs["model_pk"]
+        model = get_object_or_404(MLModel, pk=model_pk)
 
-        num_imgs = kwargs["num_imgs"]
-
-        conv_idx = kwargs.get("conv_idx", [])
+        conv_idx = self.kwargs.get("conv_idx", [])
         if conv_idx:
             conv_idx = [int(idx) for idx in conv_idx]
 
-        response = selected_model.get_prediction_details(num_imgs, conv_idx)
+        num_imgs = self.kwargs["num_imgs"]
 
-        return Response(response)
+        return get_predictions(model, num_imgs, conv_idx)
