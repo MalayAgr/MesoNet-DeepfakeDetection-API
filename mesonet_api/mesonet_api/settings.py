@@ -128,7 +128,7 @@ STATIC_URL = "/static/"
 
 MEDIA_FOLDER = os.environ.get("MEDIA_FOLDER", "media")
 MEDIA_ROOT = os.path.join(BASE_DIR, MEDIA_FOLDER)
-MEDIA_URL = "/media/"
+MEDIA_URL = os.environ.get("MEDIA_FOLDER", "/media/")
 
 MODEL_FOLDER = os.environ.get("MODEL_FILE_ROOT", "ml_models")
 MODEL_FILE_ROOT = os.path.join(BASE_DIR, MODEL_FOLDER)
