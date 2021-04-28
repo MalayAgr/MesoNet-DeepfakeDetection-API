@@ -122,13 +122,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_FOLDER = os.environ.get("STATICFILES_DIR", "static")
-STATICFILES_DIRS = [os.path.join(BASE_DIR, STATIC_FOLDER)]
-STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, STATIC_FOLDER)
+STATIC_URL = os.environ.get("STATIC_URL", "/static/")
 
 
 MEDIA_FOLDER = os.environ.get("MEDIA_FOLDER", "media")
 MEDIA_ROOT = os.path.join(BASE_DIR, MEDIA_FOLDER)
-MEDIA_URL = os.environ.get("MEDIA_FOLDER", "/media/")
+MEDIA_URL = os.environ.get("MEDIA_URL", "/media/")
 
 MODEL_FOLDER = os.environ.get("MODEL_FILE_ROOT", "ml_models")
 MODEL_FILE_ROOT = os.path.join(BASE_DIR, MODEL_FOLDER)
